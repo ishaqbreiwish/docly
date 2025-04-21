@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docly - Your Document Workspace</title>
+    <style>
+        /* Base styling & Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: #f2f2f2;
+            color: #333;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 220px;
+            background-color: #ffffff;
+            height: 100vh;
+            padding: 20px 16px;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 32px;
+            color: #333;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section h3 {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 4px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .nav-item:hover {
+            background-color: #f7f7f7;
+        }
+
+        .nav-item.active {
+            background-color: #f0f0f0;
+            color: #111;
+            font-weight: 500;
+        }
+
+        .nav-item i {
+            margin-right: 12px;
+            width: 16px;
+            text-align: center;
+            color: #777;
+        }
+
+        .tags-list {
+            margin-left: 12px;
+        }
+
+        .tag-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 2px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .tag-item:hover {
+            background-color: #f7f7f7;
+        }
+
+        .tag-item:before {
+            content: "#";
+            margin-right: 6px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .user-section {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-top: 1px solid #eee;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #ddd;
+            margin-right: 12px;
+        }
+
+        .user-info {
+            font-size: 13px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .user-email {
+            font-size: 11px;
+            color: #888;
+        }
+
+        /* Main content area */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Search bar */
+        .search-container {
+            padding: 16px 24px;
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border-radius: 8px;
+            padding: 8px 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-bar i {
+            color: #999;
+            margin-right: 8px;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background: transparent;
+        }
+
+        .search-input::placeholder {
+            color: #aaa;
+        }
+
+        /* Document grid view */
+        .document-grid {
+            padding: 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .document-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+            padding: 16px;
+            transition: all 0.1s ease;
+            cursor: pointer;
+            position: relative;
+            height: 160px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #eaeaea;
+        }
+
+        .document-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .card-favorite {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            color: #d4d4d4;
+            font-size: 16px;
+        }
+
+        .card-favorite.active {
+            color: #ffcc00;
+        }
+
+        .card-title {
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .card-preview {
+            font-size: 12px;
+            color: #777;
+            line-height: 1.5;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            margin-bottom: 12px;
+        }
+
+        .card-meta {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #999;
+        }
+
+        .card-tags {
+            display: flex;
+            gap: 4px;
+        }
+
+        .card-tag {
+            background-color: #f0f0f0;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            color: #666;
+        }
+
+        /* Document Preview Panel */
+        .preview-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 60%;
+            height: 100vh;
+            background-color: white;
+            box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .preview-panel.active {
+            transform: translateX(0);
+        }
+
+        .preview-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .preview-title {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .preview-action {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 4px;
+        }
+
+        .preview-action:hover {
+            background-color: #f5f5f5;
+        }
+
+        .preview-content {
+            flex: 1;
+            padding: 32px;
+            max-width: 720px;
+            margin: 0 auto;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+
+        .preview-content h1 {
+            margin-bottom: 24px;
+            font-size: 28px;
+        }
+
+        .preview-content p {
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .close-preview {
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+                padding: 16px 8px;
+            }
+
+            .logo {
+                font-size: 20px;
+                text-align: center;
+            }
+
+            .nav-section h3, 
+            .nav-item span,
+            .user-info {
+                display: none;
+            }
+
+            .nav-item {
+                justify-content: center;
+                padding: 10px;
+            }
+
+            .nav-item i {
+                margin-right: 0;
+            }
+
+            .user-section {
+                justify-content: center;
+            }
+
+            .preview-panel {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="logo">Docly</div>
+        
+        <div class="nav-section">
+            <div class="nav-item active">
+                <i>📄</i>
+                <span>All Documents</span>
+            </div>
+            <div class="nav-item">
+                <i>⭐</i>
+                <span>Favorites</span>
+            </div>
+        </div>
+        
+        <div class="nav-section">
+            <h3>Tags</h3>
+            <div class="tags-list">
+                <div class="tag-item">Work</div>
+                <div class="tag-item">Personal</div>
+                <div class="tag-item">Projects</div>
+                <div class="tag-item">Notes</div>
+                <div class="tag-item">Archive</div>
+            </div>
+        </div>
+        
+        <div class="user-section">
+            <div class="user-avatar"></div>
+            <div class="user-info">
+                <div class="user-name">User Name</div>
+                <div class="user-email">user@example.com</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content Area -->
+    <div class="main-container">
+        <!-- Search Bar -->
+        <div class="search-container">
+            <div class="search-bar">
+                <i>🔍</i>
+                <input type="text" class="search-input" placeholder="Search documents or type / for commands...">
+            </div>
+        </div>
+        
+        <!-- Document Grid -->
+        <div class="document-grid">
+            <!-- Document Cards -->
+            <div class="document-card" onclick="openPreview()">
+                <i class="card-favorite">★</i>
+                <div class="card-title">Project Planning: Q2 Strategy Document</div>
+                <div class="card-preview">This document outlines our strategic approach for the second quarter, including key initiatives, resource allocation, and expected outcomes.</div>
+                <div class="card-meta">
+                    <div>Apr 15, 2025</div>
+                    <div class="card-tags">
+                        <div class="card-tag">Work</div>
+                        <div class="card-tag">Planning</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="document-card">
+                <i class="card-favorite">☆</i>
+                <div class="card-title">Meeting Notes: Product Team Sync</div>
+                <div class="card-preview">Discussion points from our weekly sync including feature prioritization, current blockers, and design feedback.</div>
+                <div class="card-meta">
+                    <div>Apr 14, 2025</div>
+                    <div class="card-tags">
+                        <div class="card-tag">Work</div>
+                        <div class="card-tag">Notes</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="document-card">
+                <i class="card-favorite">☆</i>
+                <div class="card-title">Personal: Travel Plans Summer 2025</div>
+                <div class="card-preview">Itinerary, booking details, and places to visit for the upcoming summer vacation in Portugal.</div>
+                <div class="card-meta">
+                    <div>Apr 10, 2025</div>
+                    <div class="card-tags">
+                        <div class="card-tag">Personal</div>
+                        <div class="card-tag">Travel</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="document-card">
+                <i class="card-favorite active">★</i>
+                <div class="card-title">Book Notes: The Psychology of Money</div>
+                <div class="card-preview">Key takeaways and personal reflections from Morgan Housel's exploration of how people think about wealth and financial decisions.</div>
+                <div class="card-meta">
+                    <div>Apr 8, 2025</div>
+                    <div class="card-tags">
+                        <div class="card-tag">Notes</div>
+                        <div class="card-tag">Books</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="document-card">
+                <i class="card-favorite">☆</i>
+                <div class="card-title">Project Requirements: Mobile App Redesign</div>
+                <div class="card-preview">Detailed requirements document for the upcoming mobile app redesign project, including user flows and technical considerations.</div>
+                <div class="card-meta">
+                    <div>Apr 5, 2025</div>
+                    <div class="card-tags">
+                        <div class="card-tag">Work</div>
+                        <div class="card-tag">Projects</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="document-card">
+                <i class="card-favorite">☆</i>
+                <div class="card-title">Recipe Collection: Spring Favorites</div>
+                <div class="card-preview">A collection of seasonal recipes featuring fresh spring ingredients, meal prep ideas, and nutritional information.</div>
+                <div class="card-meta">
+                    <div>Apr 2, 2025</div>
+                    <div class="card-tags">
+                        <div class="card-tag">Personal</div>
+                        <div class="card-tag">Recipes</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="document-card">
+                <i class="card-favorite active">★</i>
+                <div class="card-title">Research: AI Paper Summary</div>
+                <div class="card-preview">Summary of recent research papers on large language models and their applications in productivity tools.</div>
+                <div class="card-meta">
+                    <div>Mar 30, 2025</div>
+                    <div class="card-tags">
+                        <div class="card-tag">Research</div>
+                        <div class="card-tag">AI</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="document-card">
+                <i class="card-favorite">☆</i>
+                <div class="card-title">Home Renovation Ideas</div>
+                <div class="card-preview">Collection of inspiration, budget planning, and contractor contacts for the upcoming kitchen renovation project.</div>
+                <div class="card-meta">
+                    <div>Mar 27, 2025</div>
+                    <div class="card-tags">
+                        <div class="card-tag">Personal</div>
+                        <div class="card-tag">Home</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Document Preview Panel (initially hidden) -->
+    <div class="preview-panel">
+        <div class="preview-header">
+            <div class="preview-title">Project Planning: Q2 Strategy Document</div>
+            <div class="preview-actions">
+                <button class="preview-action">⭐</button>
+                <button class="preview-action">✏️</button>
+                <button class="preview-action">🔗</button>
+                <button class="preview-action close-preview" onclick="closePreview()">✕</button>
+            </div>
+        </div>
+        <div class="preview-content">
+            <h1>Project Planning: Q2 Strategy Document</h1>
+            <p>This strategic planning document outlines our approach for Q2 2025, focusing on key initiatives that will drive our business forward while maintaining alignment with our annual objectives.</p>
+            
+            <h2>Executive Summary</h2>
+            <p>Based on our Q1 performance and market analysis, we've identified three primary focus areas for Q2: customer acquisition optimization, product feature enhancement, and operational efficiency improvements. This document details our strategy for each area along with resource allocations and success metrics.</p>
+            
+            <h2>Strategic Priorities</h2>
+            <p>1. <strong>Customer Acquisition Optimization</strong> - Refining our marketing funnel to improve conversion rates and reduce CAC by implementing personalized user journeys and optimizing our SEO strategy.</p>
+            <p>2. <strong>Product Feature Enhancement</strong> - Focusing development efforts on our collaboration tools and integration capabilities based on user feedback and competitive analysis.</p>
+            <p>3. <strong>Operational Efficiency</strong> - Streamlining internal processes through automation and improved resource allocation to reduce overhead costs by 15%.</p>
+            
+            <h2>Resource Allocation</h2>
+            <p>We've restructured our team resources to align with our strategic priorities:</p>
+            <p>• 40% of engineering resources dedicated to product enhancement</p>
+            <p>• 30% allocated to infrastructure improvements</p>
+            <p>• 20% focused on automation and tooling</p>
+            <p>• 10% reserved for urgent maintenance and support</p>
+            
+            <h2>Timeline and Milestones</h2>
+            <p>April: Complete user research and finalize feature specifications</p>
+            <p>May: Alpha release of collaboration tools upgrade</p>
+            <p>June: Full release of new features and marketing campaign launch</p>
+            
+            <h2>Success Metrics</h2>
+            <p>We will measure success through the following KPIs:</p>
+            <p>• 20% reduction in customer acquisition cost</p>
+            <p>• 15% increase in user engagement with collaboration features</p>
+            <p>• 10% improvement in NPS score</p>
+            <p>• 15% reduction in operational costs</p>
+            
+            <h2>Risk Assessment</h2>
+            <p>Potential challenges include development delays, market response uncertainty, and resource constraints. We've developed contingency plans for each identified risk, including staged releases and flexible resource allocation.</p>
+        </div>
+    </div>
+
+    <script>
+        function openPreview() {
+            document.querySelector('.preview-panel').classList.add('active');
+        }
+        
+        function closePreview() {
+            document.querySelector('.preview-panel').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
